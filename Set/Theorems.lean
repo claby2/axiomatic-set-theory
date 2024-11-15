@@ -8,7 +8,7 @@ namespace Set
   theorem no_universal_set : ¬ ∃ (A : Set), ∀ (x : Set), x ∈ A := by
     intro h
     obtain ⟨A, hA⟩ := h
-    have hB : ∃ (B : Set), ∀ (x : Set), x ∈ B ↔ x ∈ A ∧ x ∉ x := by apply Set.comprehension
+    have hB : ∃ (B : Set), ∀ (x : Set), x ∈ B ↔ x ∈ A ∧ x ∉ x := by apply comprehension
     obtain ⟨B, hB⟩ := hB
     have h : B ∈ B ↔ B ∈ A ∧ B ∉ B := by apply hB B
     cases Classical.em (B ∈ B) with
@@ -28,7 +28,7 @@ namespace Set
   -/
   theorem intersection (A : Set) (h : A.Nonempty) : ∃! (B : Set), ∀ (x : Set), x ∈ B ↔ (∀ (a : Set), a ∈ A → x ∈ a) := by
     obtain ⟨c, hc⟩ := h
-    have hB : ∃ (B : Set), ∀ (x : Set), x ∈ B ↔ x ∈ c ∧ ∀ (a : Set), a ∈ A ∧ a ≠ c → x ∈ a := by apply Set.comprehension
+    have hB : ∃ (B : Set), ∀ (x : Set), x ∈ B ↔ x ∈ c ∧ ∀ (a : Set), a ∈ A ∧ a ≠ c → x ∈ a := by apply comprehension
     obtain ⟨B, hB⟩ := hB
     apply Exists.intro B
     simp
@@ -47,7 +47,7 @@ namespace Set
     }
     -- Uniqueness
     { intro B' hB'
-      apply Set.extensionality
+      apply extensionality
       intro x'
       apply Iff.intro
       { aesop }
