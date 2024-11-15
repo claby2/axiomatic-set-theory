@@ -31,6 +31,32 @@ axiom union : ∀ (A : Set), ∃ (B : Set), ∀ (x : Set), x ∈ B ↔ (∃ (b :
 
 def nonempty (A : Set) : Prop := ∃ (x : Set), x ∈ A
 
+/-
+[Enderton, Theorem 2A]
+There is no set to which every set belongs.
+-/
+theorem no_universal_set : ¬ ∃ (A : Set), ∀ (x : Set), x ∈ A := by
+  intro h
+  obtain ⟨A, hA⟩ := h
+  have hB : ∃ (B : Set), ∀ (x : Set), x ∈ B ↔ x ∈ A ∧ x ∉ x := by apply comprehension
+  obtain ⟨B, hB⟩ := hB
+  have h : B ∈ B ↔ B ∈ A ∧ B ∉ B := by apply hB B
+  cases Classical.em (B ∈ B) with
+    | inl hBB =>
+      have hnBB : B ∉ B := by aesop
+      exact hnBB hBB
+    | inr hnBB =>
+      have hBB : B ∈ B := by aesop
+      exact hnBB hBB
+
+/-
+[Enderton, Theorem 2B]
+For any nonempty set A, there exists a unique set B such that for any x,
+
+  x ∈ B ↔ x belongs to every member of A.
+
+This theorem permits defining ⋂A to be that unique set B.
+-/
 theorem intersection (A : Set) (h : nonempty A) : ∃! (B : Set), ∀ (x : Set), x ∈ B ↔ (∀ (a : Set), a ∈ A → x ∈ a) := by
   obtain ⟨c, hc⟩ := h
   have hB : ∃ (B : Set), ∀ (x : Set), x ∈ B ↔ x ∈ c ∧ ∀ (a : Set), a ∈ A ∧ a ≠ c → x ∈ a := by apply comprehension
