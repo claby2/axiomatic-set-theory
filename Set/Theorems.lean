@@ -61,4 +61,36 @@ namespace Set
         aesop
       }
     }
+
+  /-
+  [Enderton, p.28]
+  Elementary facts of the algebra of sets.
+  -/
+  -- Union
+  lemma Union.comm (A B : Set) : A ∪ B = B ∪ A := by sorry
+  lemma Union.assoc (A B C : Set) : A ∪ (B ∪ C) = (A ∪ B) ∪ C := by sorry
+  lemma Union.dist (A B C : Set) : A ∪ (B ∩ C) = (A ∪ B) ∩ (A ∪ C) := by sorry
+  lemma Union.deMorgan (A B C : Set) : C - (A ∪ B) = (C - A) ∩ (C - B) := by sorry
+  lemma Union.empty (A : Set) : A ∪ Empty = A := by sorry
+  -- Intersection
+  lemma Intersection.comm (A B : Set) : A ∩ B = B ∩ A := by
+    apply extensionality
+    intro x
+    apply Iff.intro
+    { intro h
+      have h' : x ∈ A ∧ x ∈ B := (Intersection.Spec A B x).mp h
+      apply (Intersection.Spec B A x).mpr
+      exact And.comm.mp h'
+    }
+    { intro h
+      have h' : x ∈ B ∧ x ∈ A := (Intersection.Spec B A x).mp h
+      apply (Intersection.Spec A B x).mpr
+      exact And.comm.mp h'
+    }
+  lemma Intersection.assoc (A B C : Set) : A ∩ (B ∩ C) = (A ∩ B) ∩ C := by sorry
+  lemma Intersection.dist (A B C : Set) : A ∩ (B ∪ C) = (A ∩ B) ∪ (A ∩ C) := by sorry
+  lemma Intersection.deMorgan (A B C : Set) : C - (A ∩ B) = (C - A) ∪ (C - B) := by sorry
+  lemma Intersection.empty (A : Set) : A ∩ Empty = Empty := by sorry
+  lemma Intersection.empty' (A C : Set) : A ∩ (C - A) = Empty := by sorry
+
 end Set

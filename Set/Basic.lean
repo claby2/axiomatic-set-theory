@@ -48,6 +48,12 @@ namespace Set
       aesop
     rw [Union]
     aesop
+  infix:70 " ∪ " => Union
+
+  -- Relative Complement [Enderton, p. 27]
+  noncomputable def Difference (A B : Set) : Set := Classical.choose (comprehension (λ x ↦ x ∈ A ∧ x ∉ B) A)
+  lemma Difference.Spec (A B : Set) : ∀ x : Set, x ∈ Difference A B ↔ x ∈ A ∧ x ∉ B := by sorry
+  infix:70 " - " => Difference
 
   -- Intersection [Enderton, p. 27]
   noncomputable def Intersection (A B : Set) : Set := Classical.choose (comprehension (λ x ↦ x ∈ A ∧ x ∈ B) (Union A B))
@@ -58,6 +64,7 @@ namespace Set
     have hI : ∀ x, x ∈ I ↔ x ∈ U ∧ x ∈ A ∧ x ∈ B := Classical.choose_spec (comprehension (λ x ↦ x ∈ A ∧ x ∈ B) U)
     rw [Intersection]
     aesop
+  infix:70 " ∩ " => Intersection
 
   -- Show that two sets are not equal if there exists an element that is in one set but not the other
   lemma not_eq (A B : Set) (x : Set) : (x ∈ A ∧ x ∉ B) ∨ (x ∈ B ∧ x ∉ A) → A ≠ B := by aesop
