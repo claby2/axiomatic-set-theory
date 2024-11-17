@@ -1,3 +1,5 @@
+import Aesop
+import Mathlib.Logic.Basic
 import Set.Axioms
 
 namespace Set
@@ -23,11 +25,20 @@ namespace Set
   lemma Power.Spec (A : Set) : ∀ (x : Set), x ∈ Power A ↔ x ⊆ A := Classical.choose_spec (power A)
   prefix:75 "𝒫" => Power
 
-  -- Union
-  noncomputable def Union (A : Set) : Set := Classical.choose (union A)
-  lemma Union.Spec (A : Set) : ∀ x : Set, x ∈ Union A ↔ (∃ (b : Set), b ∈ A ∧ x ∈ b) :=
+  -- Big Union
+  noncomputable def BigUnion (A : Set) : Set := Classical.choose (union A)
+  lemma BigUnion.Spec (A : Set) : ∀ x : Set, x ∈ BigUnion A ↔ (∃ (b : Set), b ∈ A ∧ x ∈ b) :=
     Classical.choose_spec (union A)
-  prefix:75 "⋃" => Union
+  prefix:75 "⋃" => BigUnion
+
+
+  -- Union [Enderton, p. 27]
+  noncomputable def Union (A B : Set) : Set := Classical.choose (union (Classical.choose (pairing A B)))
+  lemma Union.Spec (A B : Set) : ∀ x : Set, x ∈ Union A B ↔ x ∈ A ∨ x ∈ B := by sorry
+
+  -- Intersection [Enderton, p. 27]
+  noncomputable def Intersection (A B : Set) : Set := Classical.choose (comprehension (λ x ↦ x ∈ A ∧ x ∈ B) (Union A B))
+  lemma Intersection.Spec (A B : Set) : ∀ x : Set, x ∈ Intersection A B ↔ x ∈ A ∧ x ∈ B := by sorry
 
 
   -- Show that two sets are not equal if there exists an element that is in one set but not the other

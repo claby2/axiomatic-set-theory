@@ -1,16 +1,14 @@
-import Aesop
-import Mathlib.Logic.Basic
 import Set.Basic
 
 
--- Union of the empty set is the empty set
+-- BigUnion of the empty set is the empty set
 lemma union_of_empty_set : ⋃ Set.Empty = Set.Empty := by
   apply Set.extensionality
   intro x
   apply Iff.intro
   { intro hx
     have hx' : ∃ (b : Set), b ∈ Set.Empty ∧ x ∈ b := by
-      apply (Set.Union.Spec Set.Empty x).mp
+      apply (Set.BigUnion.Spec Set.Empty x).mp
       exact hx
     cases hx' with
       | intro b hb =>
@@ -38,7 +36,7 @@ lemma exercise_2_2 : ∃ (A B : Set), ⋃A = ⋃B ∧ A ≠ B := by
     intro x
     apply Iff.intro
     { intro hxa
-      have hb := (Set.Union.Spec A x).mp hxa
+      have hb := (Set.BigUnion.Spec A x).mp hxa
       cases hb with
         | intro b hb =>
           exfalso
@@ -48,7 +46,7 @@ lemma exercise_2_2 : ∃ (A B : Set), ⋃A = ⋃B ∧ A ≠ B := by
           exact hb' hb
     }
     { intro hxb
-      have ha := (Set.Union.Spec B x).mp hxb
+      have ha := (Set.BigUnion.Spec B x).mp hxb
       obtain ⟨a, ⟨ha₁, ha₂⟩⟩ := ha
       have ha : a = Set.Empty := by
         apply (Set.Singleton.Spec ∅ a).mp
@@ -80,7 +78,7 @@ Show that every member of a set A is a subset of ⋃A.
 lemma exercise_2_3 (A : Set): ∀ (x : Set), x ∈ A → x ⊆ ⋃A := by
   intro x hx
   intro y hy
-  apply (Set.Union.Spec A y).mpr
+  apply (Set.BigUnion.Spec A y).mpr
   apply Exists.intro x
   apply And.intro
   { exact hx }
@@ -93,9 +91,9 @@ Show that if A ⊆ B, then ⋃A ⊆ ⋃B
 lemma exercise_2_4 (A B : Set) : A ⊆ B → ⋃A ⊆ ⋃B := by
   intro hsub
   intro a ha
-  have ha' : (∃ (a' : Set), a' ∈ A ∧ a ∈ a') := by apply (Set.Union.Spec A a).mp ha
+  have ha' : (∃ (a' : Set), a' ∈ A ∧ a ∈ a') := by apply (Set.BigUnion.Spec A a).mp ha
   obtain ⟨a', ha'⟩ := ha'
-  apply (Set.Union.Spec B a).mpr
+  apply (Set.BigUnion.Spec B a).mpr
   apply Exists.intro a'
   apply And.intro
   { apply hsub
@@ -115,7 +113,7 @@ lemma exercise_2_6 (A : Set) : ⋃𝒫 A = A ∧ A ⊆ 𝒫⋃ A := by
     intro x
     apply Iff.intro
     { intro h
-      have hb : ∃ (b : Set), b ∈ 𝒫 A ∧ x ∈ b := by apply (Set.Union.Spec (𝒫 A) x).mp h
+      have hb : ∃ (b : Set), b ∈ 𝒫 A ∧ x ∈ b := by apply (Set.BigUnion.Spec (𝒫 A) x).mp h
       obtain ⟨b, ⟨hb, hxb⟩⟩ := hb
       have hbsub : b ⊆ A := by apply (Set.Power.Spec A b).mp hb
       apply hbsub
@@ -137,14 +135,14 @@ lemma exercise_2_6 (A : Set) : ⋃𝒫 A = A ∧ A ⊆ 𝒫⋃ A := by
         { apply (Set.Singleton.Spec x x).mpr
           rfl
         }
-      exact (Set.Union.Spec (𝒫 A) x).mpr hb
+      exact (Set.BigUnion.Spec (𝒫 A) x).mpr hb
     }
   -- Part (b)
   have b : A ⊆ (⋃A).Power := by
     intro a ha
     apply (Set.Power.Spec (⋃A) a).mpr
     intro a' ha'
-    apply (Set.Union.Spec A a').mpr
+    apply (Set.BigUnion.Spec A a').mpr
     apply Exists.intro a
     exact And.intro ha ha'
   exact And.intro a b

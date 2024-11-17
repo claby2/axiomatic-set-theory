@@ -1,6 +1,4 @@
-import Mathlib.Logic.Basic
 import Set.Defs
-import Aesop
 
 namespace Set
   -- Comprehension axiom
