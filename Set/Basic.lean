@@ -12,6 +12,7 @@ namespace Set
 
   -- Pair
   noncomputable def Pair (u v : Set) : Set := Classical.choose (pairing u v)
+  lemma Pair.Spec (u v : Set) : ∀ x : Set, x ∈ Pair u v ↔ x = u ∨ x = v := Classical.choose_spec (pairing u v)
 
   -- Singleton Set
   noncomputable def Singleton (x : Set) : Set := Classical.choose (pairing x x)
@@ -34,12 +35,29 @@ namespace Set
 
   -- Union [Enderton, p. 27]
   noncomputable def Union (A B : Set) : Set := Classical.choose (union (Classical.choose (pairing A B)))
-  lemma Union.Spec (A B : Set) : ∀ x : Set, x ∈ Union A B ↔ x ∈ A ∨ x ∈ B := by sorry
+  lemma Union.Spec (A B : Set) : ∀ x : Set, x ∈ Union A B ↔ x ∈ A ∨ x ∈ B := by
+    -- P = {A, B}
+    let P := Classical.choose (pairing A B)
+    have hP : ∀ x, x ∈ P ↔ x = A ∨ x = B := by
+      have h := Classical.choose_spec (pairing A B)
+      aesop
+    -- U = ⋃P = ⋃{A, B}
+    let U := Classical.choose (union P)
+    have hU : ∀ x, x ∈ U ↔ ∃ b, b ∈ P ∧ x ∈ b := by
+      have h := Classical.choose_spec (union P)
+      aesop
+    rw [Union]
+    aesop
 
   -- Intersection [Enderton, p. 27]
   noncomputable def Intersection (A B : Set) : Set := Classical.choose (comprehension (λ x ↦ x ∈ A ∧ x ∈ B) (Union A B))
-  lemma Intersection.Spec (A B : Set) : ∀ x : Set, x ∈ Intersection A B ↔ x ∈ A ∧ x ∈ B := by sorry
-
+  lemma Intersection.Spec (A B : Set) : ∀ x : Set, x ∈ Intersection A B ↔ x ∈ A ∧ x ∈ B := by
+    let U := Union A B
+    have hU : ∀ x, x ∈ U ↔ x ∈ A ∨ x ∈ B := by apply Union.Spec
+    let I := Classical.choose (comprehension (λ x ↦ x ∈ A ∧ x ∈ B) U)
+    have hI : ∀ x, x ∈ I ↔ x ∈ U ∧ x ∈ A ∧ x ∈ B := Classical.choose_spec (comprehension (λ x ↦ x ∈ A ∧ x ∈ B) U)
+    rw [Intersection]
+    aesop
 
   -- Show that two sets are not equal if there exists an element that is in one set but not the other
   lemma not_eq (A B : Set) (x : Set) : (x ∈ A ∧ x ∉ B) ∨ (x ∈ B ∧ x ∉ A) → A ≠ B := by aesop
