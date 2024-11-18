@@ -67,7 +67,7 @@ namespace Set
   Elementary facts of the algebra of sets.
   -/
   -- Union
-  lemma Union.comm (A B : Set) : A ∪ B = B ∪ A := by
+  theorem Union.comm (A B : Set) : A ∪ B = B ∪ A := by
     apply extensionality
     intro x
     apply Iff.intro
@@ -76,7 +76,7 @@ namespace Set
       rw [Union.Spec] at *
       aesop
     }
-  lemma Union.assoc (A B C : Set) : A ∪ (B ∪ C) = (A ∪ B) ∪ C := by
+  theorem Union.assoc (A B C : Set) : A ∪ (B ∪ C) = (A ∪ B) ∪ C := by
     apply extensionality
     intro x
     apply Iff.intro
@@ -87,7 +87,7 @@ namespace Set
         | inl hx => aesop
         | inr hx => aesop
     }
-  lemma Union.dist (A B C : Set) : A ∪ (B ∩ C) = (A ∪ B) ∩ (A ∪ C) := by
+  theorem Union.dist (A B C : Set) : A ∪ (B ∩ C) = (A ∪ B) ∩ (A ∪ C) := by
     apply extensionality
     intro x
     apply Iff.intro
@@ -100,7 +100,7 @@ namespace Set
       aesop
     }
 
-  lemma Union.deMorgan (A B C : Set) : C - (A ∪ B) = (C - A) ∩ (C - B) := by
+  theorem Union.deMorgan (A B C : Set) : C - (A ∪ B) = (C - A) ∩ (C - B) := by
     apply extensionality
     intro x
     apply Iff.intro
@@ -109,7 +109,7 @@ namespace Set
       simp [Difference.Spec, Intersection.Spec, Union.Spec] at *
       aesop
     }
-  lemma Union.empty (A : Set) : A ∪ Empty = A := by
+  theorem Union.empty (A : Set) : A ∪ Empty = A := by
     apply extensionality
     intro x
     apply Iff.intro
@@ -130,7 +130,7 @@ namespace Set
       exact hx
     }
   -- Intersection
-  lemma Intersection.comm (A B : Set) : A ∩ B = B ∩ A := by
+  theorem Intersection.comm (A B : Set) : A ∩ B = B ∩ A := by
     apply extensionality
     intro x
     apply Iff.intro
@@ -139,7 +139,7 @@ namespace Set
       intro hxa hxb
       exact And.intro hxb hxa
     }
-  lemma Intersection.assoc (A B C : Set) : A ∩ (B ∩ C) = (A ∩ B) ∩ C := by
+  theorem Intersection.assoc (A B C : Set) : A ∩ (B ∩ C) = (A ∩ B) ∩ C := by
     apply extensionality
     intro x
     apply Iff.intro
@@ -151,7 +151,7 @@ namespace Set
       intro hxa hxb hxc
       exact And.intro hxa (And.intro hxb hxc)
     }
-  lemma Intersection.dist (A B C : Set) : A ∩ (B ∪ C) = (A ∩ B) ∪ (A ∩ C) := by
+  theorem Intersection.dist (A B C : Set) : A ∩ (B ∪ C) = (A ∩ B) ∪ (A ∩ C) := by
     apply extensionality
     intro x
     apply Iff.intro
@@ -180,8 +180,64 @@ namespace Set
           apply Or.intro_right
           exact hx₂
     }
-  lemma Intersection.deMorgan (A B C : Set) : C - (A ∩ B) = (C - A) ∪ (C - B) := by sorry
-  lemma Intersection.empty (A : Set) : A ∩ Empty = Empty := by sorry
-  lemma Intersection.empty' (A C : Set) : A ∩ (C - A) = Empty := by sorry
+  theorem Intersection.deMorgan (A B C : Set) : C - (A ∩ B) = (C - A) ∪ (C - B) := by
+    apply extensionality
+    intro x
+    apply Iff.intro
+    { intro hx
+      simp [Set.Difference.Spec, Set.Intersection.Spec, Set.Union.Spec] at *
+      cases Classical.em (x ∈ A) with
+        | inl hxa =>
+          apply Or.intro_right
+          obtain ⟨hx₁, hx₂⟩ := hx
+          apply And.intro hx₁
+          exact hx₂ hxa
+        | inr hxa =>
+          apply Or.intro_left
+          obtain ⟨hxc, _⟩ := hx
+          exact And.intro hxc hxa
+    }
+    { intro hx
+      simp [Set.Difference.Spec, Set.Intersection.Spec, Set.Union.Spec] at *
+      cases hx with
+        | inl hx =>
+          obtain ⟨hx₁, hx₂⟩ := hx
+          apply And.intro hx₁
+          intro hx₂'
+          exfalso
+          exact hx₂ hx₂'
+        | inr hx =>
+          obtain ⟨hx₁, hx₂⟩ := hx
+          apply And.intro hx₁
+          intro _
+          exact hx₂
+    }
+  theorem Intersection.empty (A : Set) : A ∩ Empty = Empty := by
+    apply extensionality
+    intro x
+    apply Iff.intro
+    { intro hx
+      rw [Set.Intersection.Spec] at hx
+      exact hx.right
+    }
+    { intro hx
+      exfalso
+      apply Empty.Spec x
+      exact hx
+    }
+  theorem Intersection.empty' (A C : Set) : A ∩ (C - A) = Empty := by
+    apply extensionality
+    intro x
+    apply Iff.intro
+    { intro hx
+      rw [Set.Intersection.Spec, Set.Difference.Spec] at hx
+      obtain ⟨hx₁, ⟨_, hx₂⟩⟩ := hx
+      exfalso
+      exact hx₂ hx₁
+    }
+    { intro hx
+      exfalso
+      exact Empty.Spec x hx
+    }
 
 end Set
