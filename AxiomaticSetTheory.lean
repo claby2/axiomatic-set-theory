@@ -35,39 +35,26 @@ lemma exercise_2_2 : ∃ (A B : Set), ⋃A = ⋃B ∧ A ≠ B := by
     intro x
     apply Iff.intro
     { intro hxa
-      have hb := (Set.BigUnion.Spec A x).mp hxa
-      cases hb with
-        | intro b hb =>
-          exfalso
-          obtain ⟨hb, _⟩ := hb
-          have hb' : b ∉ A := by
-            apply Set.Empty.Spec
-          exact hb' hb
+      rw [Set.BigUnion.Spec] at *
+      obtain ⟨x', ⟨hx', _⟩⟩ := hxa
+      simp [A] at hx'
+      exfalso
+      exact Set.Empty.Spec x' hx'
     }
     { intro hxb
-      have ha := (Set.BigUnion.Spec B x).mp hxb
-      obtain ⟨a, ⟨ha₁, ha₂⟩⟩ := ha
-      have ha : a = Set.Empty := by
-        apply (Set.Singleton.Spec ∅ a).mp
-        exact ha₁
-      rw [ha] at ha₂
+      rw [Set.BigUnion.Spec] at *
+      obtain ⟨x', ⟨hx'₁, hx'₂⟩⟩ := hxb
       exfalso
-      have ha' : x ∉ ∅ := by
-        apply Set.Empty.Spec x
-      exact ha' ha₂
+      have hx'e : x' = Set.Empty := (Set.Singleton.Spec ∅ x').mp hx'₁
+      rw [hx'e] at hx'₂
+      exact Set.Empty.Spec x hx'₂
     }
   }
-  { intro h
-    have hneq : A ≠ B := by
-      apply A.not_eq B ∅
-      simp
-      apply Or.inr
-      apply And.intro
-      { apply (Set.Singleton.Spec ∅ ∅).mpr
-        rfl
-      }
-      { apply Set.Empty.Spec }
-    exact hneq h
+  { apply Set.not_eq A B ∅
+    apply Or.intro_right
+    apply And.intro
+    { rw [Set.Singleton.Spec] }
+    { exact Set.Empty.Spec ∅ }
   }
 
 /-
