@@ -52,7 +52,11 @@ namespace Set
 
   -- Relative Complement [Enderton, p. 27]
   noncomputable def Difference (A B : Set) : Set := Classical.choose (comprehension (λ x ↦ x ∈ A ∧ x ∉ B) A)
-  lemma Difference.Spec (A B : Set) : ∀ x : Set, x ∈ Difference A B ↔ x ∈ A ∧ x ∉ B := by sorry
+  lemma Difference.Spec (A B : Set) : ∀ x : Set, x ∈ Difference A B ↔ x ∈ A ∧ x ∉ B := by
+    have h := Classical.choose_spec (comprehension (λ x ↦ x ∈ A ∧ x ∉ B) A)
+    rw [Difference]
+    aesop
+
   infix:70 " - " => Difference
 
   -- Intersection [Enderton, p. 27]

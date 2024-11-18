@@ -67,28 +67,119 @@ namespace Set
   Elementary facts of the algebra of sets.
   -/
   -- Union
-  lemma Union.comm (A B : Set) : A ∪ B = B ∪ A := by sorry
-  lemma Union.assoc (A B C : Set) : A ∪ (B ∪ C) = (A ∪ B) ∪ C := by sorry
-  lemma Union.dist (A B C : Set) : A ∪ (B ∩ C) = (A ∪ B) ∩ (A ∪ C) := by sorry
-  lemma Union.deMorgan (A B C : Set) : C - (A ∪ B) = (C - A) ∩ (C - B) := by sorry
-  lemma Union.empty (A : Set) : A ∪ Empty = A := by sorry
+  lemma Union.comm (A B : Set) : A ∪ B = B ∪ A := by
+    apply extensionality
+    intro x
+    apply Iff.intro
+    repeat
+    { intro hx
+      rw [Union.Spec] at *
+      aesop
+    }
+  lemma Union.assoc (A B C : Set) : A ∪ (B ∪ C) = (A ∪ B) ∪ C := by
+    apply extensionality
+    intro x
+    apply Iff.intro
+    repeat
+    { intro hx
+      simp [Union.Spec] at *
+      cases hx with
+        | inl hx => aesop
+        | inr hx => aesop
+    }
+  lemma Union.dist (A B C : Set) : A ∪ (B ∩ C) = (A ∪ B) ∩ (A ∪ C) := by
+    apply extensionality
+    intro x
+    apply Iff.intro
+    { intro hx
+      simp [Intersection.Spec, Union.Spec] at *
+      aesop
+    }
+    { intro hx
+      simp [Intersection.Spec, Union.Spec] at *
+      aesop
+    }
+
+  lemma Union.deMorgan (A B C : Set) : C - (A ∪ B) = (C - A) ∩ (C - B) := by
+    apply extensionality
+    intro x
+    apply Iff.intro
+    repeat
+    { intro hx
+      simp [Difference.Spec, Intersection.Spec, Union.Spec] at *
+      aesop
+    }
+  lemma Union.empty (A : Set) : A ∪ Empty = A := by
+    apply extensionality
+    intro x
+    apply Iff.intro
+    {
+      intro hx
+      rw [Union.Spec] at *
+      cases hx with
+        | inl hx => exact hx
+        | inr hx =>
+          exfalso
+          apply Empty.Spec x
+          exact hx
+    }
+    {
+      intro hx
+      rw [Union.Spec]
+      apply Or.intro_left
+      exact hx
+    }
   -- Intersection
   lemma Intersection.comm (A B : Set) : A ∩ B = B ∩ A := by
     apply extensionality
     intro x
     apply Iff.intro
-    { intro h
-      have h' : x ∈ A ∧ x ∈ B := (Intersection.Spec A B x).mp h
-      apply (Intersection.Spec B A x).mpr
-      exact And.comm.mp h'
+    repeat
+    { simp [Intersection.Spec]
+      intro hxa hxb
+      exact And.intro hxb hxa
     }
-    { intro h
-      have h' : x ∈ B ∧ x ∈ A := (Intersection.Spec B A x).mp h
-      apply (Intersection.Spec A B x).mpr
-      exact And.comm.mp h'
+  lemma Intersection.assoc (A B C : Set) : A ∩ (B ∩ C) = (A ∩ B) ∩ C := by
+    apply extensionality
+    intro x
+    apply Iff.intro
+    simp [Intersection.Spec]
+    { intro hxa hxb hxc
+      exact And.intro (And.intro hxa hxb) hxc
     }
-  lemma Intersection.assoc (A B C : Set) : A ∩ (B ∩ C) = (A ∩ B) ∩ C := by sorry
-  lemma Intersection.dist (A B C : Set) : A ∩ (B ∪ C) = (A ∩ B) ∪ (A ∩ C) := by sorry
+    { simp [Intersection.Spec]
+      intro hxa hxb hxc
+      exact And.intro hxa (And.intro hxb hxc)
+    }
+  lemma Intersection.dist (A B C : Set) : A ∩ (B ∪ C) = (A ∩ B) ∪ (A ∩ C) := by
+    apply extensionality
+    intro x
+    apply Iff.intro
+    { intro hx
+      simp [Union.Spec, Intersection.Spec] at *
+      obtain ⟨hx₁, hx₂⟩ := hx
+      cases hx₂ with
+        | inl hx₂ =>
+          apply Or.intro_left
+          exact And.intro hx₁ hx₂
+        | inr hx₂ =>
+          apply Or.intro_right
+          exact And.intro hx₁ hx₂
+    }
+    { intro hx
+      simp [Union.Spec, Intersection.Spec] at *
+      cases hx with
+        | inl hx =>
+          obtain ⟨hx₁, hx₂⟩ := hx
+          apply And.intro hx₁
+          apply Or.intro_left
+          exact hx₂
+        | inr hx =>
+          obtain ⟨hx₁, hx₂⟩ := hx
+          apply And.intro hx₁
+          apply Or.intro_right
+          exact hx₂
+    }
   lemma Intersection.deMorgan (A B C : Set) : C - (A ∩ B) = (C - A) ∪ (C - B) := by sorry
   lemma Intersection.empty (A : Set) : A ∩ Empty = Empty := by sorry
   lemma Intersection.empty' (A C : Set) : A ∩ (C - A) = Empty := by sorry

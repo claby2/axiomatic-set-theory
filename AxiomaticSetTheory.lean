@@ -1,5 +1,4 @@
-import Set.Basic
-
+import Set.Theorems
 
 -- BigUnion of the empty set is the empty set
 lemma union_of_empty_set : ⋃ Set.Empty = Set.Empty := by
@@ -165,3 +164,119 @@ lemma empty_set_unique (e₁ e₂ : Set) :
     exact hx' hx
   }
 
+/-
+[Enderton, Exercise 2.11]
+Show that for any sets A and B,
+(a) A = (A ∩ B) ∪ (A - B), and
+(b) A = (A ∪ B) - (B - A).
+-/
+lemma exercise_2_11 (A B : Set) :
+  A = (A ∩ B) ∪ (A - B) ∧ A = (A ∪ B) - (B - A) := by
+  -- Proving A = (A ∩ B) ∪ (A - B)
+  have a : A = (A ∩ B) ∪ (A - B) := by
+    apply Set.extensionality
+    intro x
+    apply Iff.intro
+    { intro h
+      rw [Set.Union.comm, Set.Union.dist]
+      have h1 : (A - B) ∪ A = A := by
+        apply Set.extensionality
+        intro y
+        apply Iff.intro
+        { intro hy
+          rw [Set.Union.Spec] at hy
+          cases hy with
+            | inl hy =>
+              rw [Set.Difference.Spec] at hy
+              exact hy.left
+            | inr hy => exact hy
+        }
+        { intro hy
+          rw [Set.Union.Spec]
+          apply Or.intro_right
+          exact hy
+        }
+      have h2 : (A - B) ∪ B = A ∪ B := by
+        apply Set.extensionality
+        intro x
+        apply Iff.intro
+        { intro hx
+          rw [Set.Union.Spec] at *
+          cases hx with
+            | inl hx =>
+              rw [Set.Difference.Spec] at hx
+              apply Or.intro_left
+              exact hx.left
+            | inr hx =>
+              apply Or.intro_right
+              exact hx
+        }
+        { intro hx
+          rw [Set.Union.Spec] at *
+          cases hx with
+            | inl hx =>
+              cases Classical.em (x ∈ B) with
+                | inl hx' =>
+                  apply Or.intro_right
+                  exact hx'
+                | inr hx' =>
+                  apply Or.intro_left
+                  rw [Set.Difference.Spec]
+                  apply And.intro hx hx'
+            | inr hx =>
+              apply Or.intro_right
+              exact hx
+        }
+      rw [h1, h2]
+      have h3 : A ∩ (A ∪ B) = A := by
+        apply Set.extensionality
+        intro x
+        apply Iff.intro
+        { intro hx
+          rw [Set.Intersection.Spec] at hx
+          exact hx.left
+        }
+        { intro hx
+          rw [Set.Intersection.Spec]
+          apply And.intro hx
+          rw [Set.Union.Spec]
+          apply Or.intro_left
+          exact hx
+        }
+      rw [h3]
+      exact h
+    }
+    { intro h
+      rw [Set.Union.Spec, Set.Intersection.Spec] at h
+      cases h with
+        | inl h => exact h.left
+        | inr h =>
+          rw [Set.Difference.Spec] at h
+          exact h.left
+    }
+  -- Proving A = (A ∪ B) - (B - A).
+  have b : A = (A ∪ B) - (B - A) := by
+    apply Set.extensionality
+    intro x
+    apply Iff.intro
+    { intro hx
+      rw [Set.Difference.Spec]
+      apply And.intro
+      { rw [Set.Union.Spec]
+        apply Or.intro_left
+        exact hx
+      }
+      { simp [Set.Difference.Spec]
+        intro _
+        exact hx
+      }
+    }
+    { intro hx
+      simp [Set.Difference.Spec, Set.Union.Spec] at hx
+      cases hx.left with
+        | inl hx' => exact hx'
+        | inr hx' =>
+          apply hx.right
+          exact hx'
+    }
+  exact And.intro a b
