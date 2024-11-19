@@ -71,7 +71,7 @@ lemma exercise_3_2 (A B C : Set) :
 [Enderton, Exercise 3.7]
 Show that if R is a relation, then fld R = ⋃⋃R
 -/
-lemma exercise_3_7 (A B R : Set) (prop : Set → Set → Prop) : R = Set.Relation A B prop → Set.Relation.Field R = ⋃ ⋃ R := by
+lemma exercise_3_7 (A B R : Set) (prop : Set → Set → Prop) : R = Set.Relation A B prop → (fld R) = ⋃⋃R := by
   intro h
   apply Set.extensionality
   intro x
