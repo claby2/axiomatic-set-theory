@@ -35,7 +35,7 @@ lemma exercise_3_2 (A B C : Set) :
     apply Iff.intro
     { intro hxb
       obtain ⟨a, ha⟩ := exists_elem_in_nonempty A h₂
-      let w := Set.OrderedPair a x
+      let w := ⟨a, x⟩
       have hw : w ∈ A ⨯ B := by
         rw [Set.Product.Spec]
         aesop
@@ -51,7 +51,7 @@ lemma exercise_3_2 (A B C : Set) :
     }
     { intro hxc
       obtain ⟨a, ha⟩ := exists_elem_in_nonempty A h₂
-      let w := Set.OrderedPair a x
+      let w := ⟨a, x⟩
       have hw : w ∈ A ⨯ C := by
         rw [Set.Product.Spec]
         aesop

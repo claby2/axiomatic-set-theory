@@ -2,7 +2,10 @@ import Set.Basic
 
 namespace Set
 
-  -- Ordered Pair [Enderton, p. 36]
+  /-
+  Ordered Pair [Enderton, p. 36]
+  ⟨x, y⟩ = {{x}, {x, y}}
+  -/
   noncomputable def OrderedPair (x y : Set) : Set := Pair (Singleton x) (Pair x y)
   @[simp]
   lemma OrderedPair.Spec (x y : Set) : ∀ w, w ∈ OrderedPair x y ↔ w = Singleton x ∨ w = Pair x y := by
@@ -18,13 +21,14 @@ namespace Set
       have hb : b ∈ Singleton c := by simp_all only
       have hb : b = c := by rw [Singleton.Spec] at hb; exact hb
       exact And.intro ha hb
+  notation:90 "⟨" x ", " y "⟩" => OrderedPair x y
 
   /-
   [Enderton, Theorem 3A, p. 36]
   The ordered pair ⟨x, y⟩ uniquely determineds both what x and y are, and the order upon them.
   -/
   theorem OrderedPair.uniqueness (u v x y : Set) :
-    OrderedPair u v = OrderedPair x y ↔ u = x ∧ v = y := by
+    ⟨u, v⟩ = ⟨x, y⟩ ↔ u = x ∧ v = y := by
     -- Helper: {c} = {a, b} → a = c ∧ b = c
     apply Iff.intro
     { intro h
@@ -132,12 +136,12 @@ namespace Set
   For any sets A and B, there is a set whose members are exactly the pairs ⟨x, y⟩, with x ∈ A and y ∈ B.
   -/
   lemma OrderedPair.product (A B : Set) :
-    ∃ (C : Set), ∀ (w : Set), w ∈ C ↔ w ∈ 𝒫 𝒫 (A ∪ B) ∧ ∃ (x y : Set), x ∈ A ∧ y ∈ B ∧ w = OrderedPair x y := by
-      have h := (comprehension (λ w ↦ ∃ (x y : Set), x ∈ A ∧ y ∈ B ∧ w = OrderedPair x y) (𝒫 𝒫 (A ∪ B)))
+    ∃ (C : Set), ∀ (w : Set), w ∈ C ↔ w ∈ 𝒫 𝒫 (A ∪ B) ∧ ∃ (x y : Set), x ∈ A ∧ y ∈ B ∧ w = ⟨x, y⟩ := by
+      have h := (comprehension (λ w ↦ ∃ (x y : Set), x ∈ A ∧ y ∈ B ∧ w = ⟨x, y⟩) (𝒫 𝒫 (A ∪ B)))
       aesop
   noncomputable def Product (A B : Set) : Set := Classical.choose (OrderedPair.product A B)
   @[simp]
-  lemma Product.Spec (A B : Set) : ∀ (w : Set), w ∈ Product A B ↔ w ∈ 𝒫 𝒫 (A ∪ B) ∧ ∃ (x y : Set), x ∈ A ∧ y ∈ B ∧ w = OrderedPair x y := by
+  lemma Product.Spec (A B : Set) : ∀ (w : Set), w ∈ Product A B ↔ w ∈ 𝒫 𝒫 (A ∪ B) ∧ ∃ (x y : Set), x ∈ A ∧ y ∈ B ∧ w = ⟨x, y⟩ := by
     have h := Classical.choose_spec (OrderedPair.product A B)
     rw [Product]
     exact h
@@ -148,13 +152,13 @@ namespace Set
   If ⟨x, y⟩ ∈ A, then x and y belong to ⋃⋃A.
   -/
   lemma OrderedPair.in_union_union (x y A : Set) :
-    OrderedPair x y ∈ A → x ∈ BigUnion (BigUnion A) ∧ y ∈ BigUnion (BigUnion A) := by
+    ⟨x, y⟩ ∈ A → x ∈ BigUnion (BigUnion A) ∧ y ∈ BigUnion (BigUnion A) := by
       simp [OrderedPair]
       aesop
 
   -- Relation [Enderton, p. 40]
   protected def relation_condition (A B : Set) (prop : Set → Set → Prop) : Set → Prop :=
-    λ w ↦ ∃ (x y : Set), x ∈ A ∧ y ∈ B ∧ prop x y ∧ w = OrderedPair x y
+    λ w ↦ ∃ (x y : Set), x ∈ A ∧ y ∈ B ∧ prop x y ∧ w = ⟨x, y⟩
   noncomputable def Relation (A B : Set) (prop : Set → Set → Prop) : Set :=
     Classical.choose (comprehension (Set.relation_condition A B prop) (Product A B))
   @[simp]
@@ -172,19 +176,19 @@ namespace Set
   -/
   -- Relation domain
   noncomputable def Relation.Domain (R : Set) : Set :=
-    Classical.choose (comprehension (λ x ↦ ∃ (y : Set), OrderedPair x y ∈ R) (BigUnion (BigUnion R)))
+    Classical.choose (comprehension (λ x ↦ ∃ (y : Set), ⟨x, y⟩ ∈ R) (BigUnion (BigUnion R)))
   @[simp]
-  lemma Relation.Domain.Spec (R : Set) : ∀ x, x ∈ Relation.Domain R ↔ ∃ y, OrderedPair x y ∈ R := by
-    have h := Classical.choose_spec (comprehension (λ x ↦ ∃ (y : Set), OrderedPair x y ∈ R) (BigUnion (BigUnion R)))
+  lemma Relation.Domain.Spec (R : Set) : ∀ x, x ∈ Relation.Domain R ↔ ∃ y, ⟨x, y⟩ ∈ R := by
+    have h := Classical.choose_spec (comprehension (λ x ↦ ∃ (y : Set), ⟨x, y⟩ ∈ R) (BigUnion (BigUnion R)))
     rw [Relation.Domain]
     simp [OrderedPair]
     aesop
   -- Relation range
   noncomputable def Relation.Range (R : Set) : Set :=
-    Classical.choose (comprehension (λ y ↦ ∃ (x : Set), OrderedPair x y ∈ R) (BigUnion (BigUnion R)))
+    Classical.choose (comprehension (λ y ↦ ∃ (x : Set), ⟨x, y⟩ ∈ R) (BigUnion (BigUnion R)))
   @[simp]
-  lemma Relation.Range.Spec (R : Set) : ∀ y, y ∈ Relation.Range R ↔ ∃ x, OrderedPair x y ∈ R := by
-    have h := Classical.choose_spec (comprehension (λ y ↦ ∃ (x : Set), OrderedPair x y ∈ R) (BigUnion (BigUnion R)))
+  lemma Relation.Range.Spec (R : Set) : ∀ y, y ∈ Relation.Range R ↔ ∃ x, ⟨x, y⟩ ∈ R := by
+    have h := Classical.choose_spec (comprehension (λ y ↦ ∃ (x : Set), ⟨x, y⟩ ∈ R) (BigUnion (BigUnion R)))
     rw [Relation.Range]
     simp [OrderedPair]
     aesop
