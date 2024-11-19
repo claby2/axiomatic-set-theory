@@ -125,6 +125,27 @@ namespace Set
     rw [←heq.right] at hv
     exact hv
 
+  protected lemma function_functional
+    {F A B : Set} {prop : Set → Set → Prop} {hF : F.IsFunction A B prop} {x y y' : Set}
+    (hxy : ⟨x, y⟩ ∈ F) (hxy' : ⟨x, y'⟩ ∈ F) : y = y' := by
+    rw [IsFunction] at hF
+    obtain ⟨hF₁, hF₂⟩ := hF
+    have hx : x ∈ (dom F) := by
+      rw [Relation.Domain.Spec]
+      apply Exists.intro y
+      exact hxy
+    have huniq : ∃! y, ⟨x, y⟩ ∈ F := hF₂ x hx
+    obtain ⟨u, hu, huniq⟩ := huniq
+    have hy : y = u := by
+      apply huniq
+      exact hxy
+    have hy' : y' = u := by
+      apply huniq
+      exact hxy'
+    subst hy
+    subst hy'
+    trivial
+
   /-
   [Enderton, Theorem 3H, p. 47]
   Assume that F and G are functions. Then F ∘ G is a function, its domain is
@@ -242,7 +263,49 @@ namespace Set
         apply And.intro
         { rw [Product.Spec]
           rw [Relation.Spec] at h
-          sorry
+          obtain ⟨h₁, h₂⟩ := h
+          apply And.intro
+          rw [Product.Spec] at h₁
+          obtain ⟨h₁, ⟨x, y, hx, hy, hxy⟩⟩ := h₁
+          { subst hxy
+            simp [Power.Spec, SubsetOf] at h₁
+            apply OrderedPair.in_power_power
+            { rw [Union.Spec]
+              apply Or.intro_left
+              rw [Relation.Domain.Spec]
+              rw [Set.relation_condition] at h₂
+              rw [IsFunction] at hG
+              obtain ⟨hG, _⟩ := hG
+              obtain ⟨x', y', _, _, ⟨t, ht⟩, heq⟩ := h₂
+              rw [OrderedPair.uniqueness] at heq
+              rw [←heq.left, ←heq.right] at ht
+              apply Exists.intro t
+              rw [hG, Relation.Spec]
+              apply And.intro
+              { rw [Product.Spec]
+                apply And.intro
+                { apply OrderedPair.in_power_power
+                  rw [Union.Spec]
+                  apply Or.intro_left
+                  exact hx
+                  rw [Union.Spec]
+                  apply Or.intro_right
+                  exact ht.left
+                }
+                { apply Exists.intro x
+                  apply Exists.intro t
+                  apply And.intro
+                  exact hx
+                  apply And.intro
+                  exact ht.left
+                  trivial
+                }
+              }
+              { sorry }
+            }
+            { sorry }
+          }
+          { sorry }
         }
         { rw [Relation.Spec] at h
           obtain ⟨_, h⟩ := h
@@ -310,7 +373,37 @@ namespace Set
       }
     }
     { intro x hx
-      sorry
+      rw [Relation.Domain.Spec] at hx
+      obtain ⟨y, hy⟩ := hx
+      apply Exists.intro y
+      apply And.intro
+      { aesop }
+      { intro y' hy'
+        -- There is a unique t such that xGt
+        -- There is a unique t' such that tFt'
+        rw [Composition.Spec] at hy
+        obtain ⟨hxy, ⟨u', v', t, hxt, hty, heq⟩⟩ := hy
+        rw [OrderedPair.uniqueness] at heq
+        rw [←heq.left] at hxt
+        rw [←heq.right] at hty
+
+        rw [Composition.Spec] at hy'
+        obtain ⟨hxy', ⟨u', v', t', hxt', hty', heq⟩⟩ := hy'
+        rw [OrderedPair.uniqueness] at heq
+        rw [←heq.left] at hxt'
+        rw [←heq.right] at hty'
+
+        have hteq : t = t' := by
+          apply Set.function_functional
+          apply hG
+          apply hxt
+          exact hxt'
+        subst hteq
+        apply Set.function_functional
+        apply hF
+        apply hty'
+        exact hty
+      }
     }
 
 end Set
