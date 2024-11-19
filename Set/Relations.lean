@@ -16,8 +16,10 @@ namespace Set
       have hb : b = c := by rw [Singleton.Spec] at hb; exact hb
       exact And.intro ha hb
 
-  -- [Enderton, Theorem 3A, p. 36]
-  -- The ordered pair ⟨x, y⟩ uniquely determineds both what x and y are, and the order upon them.
+  /-
+  [Enderton, Theorem 3A, p. 36]
+  The ordered pair ⟨x, y⟩ uniquely determineds both what x and y are, and the order upon them.
+  -/
   theorem OrderedPair.uniqueness (u v x y : Set) :
     OrderedPair u v = OrderedPair x y ↔ u = x ∧ v = y := by
     -- Helper: {c} = {a, b} → a = c ∧ b = c
@@ -110,5 +112,32 @@ namespace Set
     { intro h
       aesop
     }
+
+  /-
+  [Enderton, Lemma 3B, p.37]
+  If x ∈ C and y ∈ C, then ⟨x, y⟩ ∈ 𝒫𝒫C.
+  -/
+  lemma OrderedPair.in_power_power (x y C : Set) :
+    x ∈ C → y ∈ C → OrderedPair x y ∈ Power (Power C) := by
+    intro hx hy
+    simp
+    exact And.intro hx hy
+
+
+  /-
+  [Enderton, Corollary 3B, p.38]
+  For any sets A and B, there is a set whose members are exactly the pairs ⟨x, y⟩, with x ∈ A and y ∈ B.
+  -/
+  lemma OrderedPair.product (A B : Set) :
+    ∃ (C : Set), ∀ (w : Set), w ∈ C ↔ w ∈ 𝒫 𝒫 (A ∪ B) ∧ ∃ (x y : Set), x ∈ A ∧ y ∈ B ∧ w = OrderedPair x y := by
+      have h := (comprehension (λ w ↦ ∃ (x y : Set), x ∈ A ∧ y ∈ B ∧ w = OrderedPair x y) (𝒫 𝒫 (A ∪ B)))
+      aesop
+  noncomputable def Product (A B : Set) : Set := Classical.choose (OrderedPair.product A B)
+  @[simp]
+  lemma Product.Spec (A B : Set) : ∀ (w : Set), w ∈ Product A B ↔ w ∈ 𝒫 𝒫 (A ∪ B) ∧ ∃ (x y : Set), x ∈ A ∧ y ∈ B ∧ w = OrderedPair x y := by
+    have h := Classical.choose_spec (OrderedPair.product A B)
+    rw [Product]
+    exact h
+  infix:60 " ⨯ " => Product
 
 end Set

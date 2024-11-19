@@ -11,6 +11,7 @@ namespace Set
   def Nonempty (A : Set) : Prop := ∃ (x : Set), x ∈ A
 
   -- Subset
+  @[simp]
   def SubsetOf (x a : Set) : Prop := ∀ (t : Set), t ∈ x → t ∈ a
   infix:50 " ⊆ " => SubsetOf
 end Set

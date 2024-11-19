@@ -62,7 +62,6 @@ namespace Set
     have h := Classical.choose_spec (comprehension (λ x ↦ x ∈ A ∧ x ∉ B) A)
     rw [Difference]
     aesop
-
   infix:70 " - " => Difference
 
   -- Intersection [Enderton, p. 27]
