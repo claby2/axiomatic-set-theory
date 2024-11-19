@@ -66,3 +66,41 @@ lemma exercise_3_2 (A B C : Set) :
       exact hy'
     }
   exact And.intro a b
+
+/-
+[Enderton, Exercise 3.7]
+Show that if R is a relation, then fld R = ⋃⋃R
+-/
+lemma exercise_3_7 (A B R : Set) (prop : Set → Set → Prop) : R = Set.Relation A B prop → Set.Relation.Field R = ⋃ ⋃ R := by
+  intro h
+  apply Set.extensionality
+  intro x
+  apply Iff.intro
+  { intro hx
+    rw [Set.Relation.Field.Spec] at hx
+    cases hx with
+      | inl hx =>
+        rw [Set.Relation.Domain.Spec] at hx
+        obtain ⟨y, hy⟩ := hx
+        exact (Set.OrderedPair.in_union_union x y R hy).left
+      | inr hx =>
+        rw [Set.Relation.Range.Spec] at hx
+        obtain ⟨y, hy⟩ := hx
+        exact (Set.OrderedPair.in_union_union y x R hy).right
+  }
+  { intro hx
+    rw [Set.Relation.Field.Spec, Set.Relation.Domain.Spec, Set.Relation.Range.Spec]
+    rw [h] at hx
+    rw [Set.BigUnion.Spec] at hx
+    obtain ⟨b₁, ⟨hb₂, hb₁⟩⟩ := hx
+    rw [Set.BigUnion.Spec] at hb₂
+    obtain ⟨b₂, ⟨hb₂, hb₁b₂⟩⟩ := hb₂
+    rw [Set.Relation.Spec, Set.Product.Spec] at hb₂
+    obtain ⟨⟨_, _, _, _, _, h⟩, _⟩ := hb₂
+    rw [Set.OrderedPair] at h
+    rw [h] at hb₁b₂
+    rw [Set.Pair.Spec] at hb₁b₂
+    cases hb₁b₂ with
+      | inl h => aesop
+      | inr h => aesop
+  }

@@ -3,10 +3,13 @@ import Set.Basic
 namespace Set
 
   -- Ordered Pair [Enderton, p. 36]
-  @[simp]
   noncomputable def OrderedPair (x y : Set) : Set := Pair (Singleton x) (Pair x y)
+  @[simp]
+  lemma OrderedPair.Spec (x y : Set) : ∀ w, w ∈ OrderedPair x y ↔ w = Singleton x ∨ w = Pair x y := by
+    intro w
+    simp [OrderedPair, Pair.Spec, Singleton.Spec]
 
-  lemma hps : ∀ (a b c : Set), Singleton c = Pair a b → a = c ∧ b = c := by
+  protected lemma singleton_pair_eq : ∀ (a b c : Set), Singleton c = Pair a b → a = c ∧ b = c := by
       intro a b c h
       have _ : a ∈ Pair a b := by simp [Pair.Spec]
       have ha : a ∈ Singleton c := by simp_all only
@@ -41,7 +44,7 @@ namespace Set
           cases h₂ with
             | inl hc =>
               have hc : Singleton x = Pair u v := by aesop
-              have hxub : u = x ∧ v = x := by apply hps u v x hc
+              have hxub : u = x ∧ v = x := by apply Set.singleton_pair_eq u v x hc
               have huv : u = v := by aesop
               have _ : Pair x y ∈ OrderedPair x y := by simp [OrderedPair, Pair.Spec]
               have h₃ : Pair x y ∈ OrderedPair u v := by simp_all only
@@ -52,7 +55,7 @@ namespace Set
               cases h₃ with
                 | inl he =>
                   have he : Singleton u = Pair x y := by aesop
-                  have huxy : x = u ∧ y = u := hps x y u he
+                  have huxy : x = u ∧ y = u := Set.singleton_pair_eq x y u he
                   obtain ⟨_, huxy⟩ := huxy
                   subst huv huxy
                   apply And.intro hxub.left
@@ -87,7 +90,7 @@ namespace Set
                     | inr h => exact h
                 | inr hyuv => rw [←hyuv]
         | inr hb =>
-          have huxy : x = u ∧ y = u := hps x y u hb
+          have huxy : x = u ∧ y = u := Set.singleton_pair_eq x y u hb
           cases h₂ with
             | inl _ =>
               have huv : u = v := by
@@ -120,7 +123,7 @@ namespace Set
   lemma OrderedPair.in_power_power (x y C : Set) :
     x ∈ C → y ∈ C → OrderedPair x y ∈ Power (Power C) := by
     intro hx hy
-    simp
+    simp [OrderedPair]
     exact And.intro hx hy
 
 
@@ -139,5 +142,66 @@ namespace Set
     rw [Product]
     exact h
   infix:60 " ⨯ " => Product
+
+  /-
+  [Enderton, Lemma 3D, p. 41]
+  If ⟨x, y⟩ ∈ A, then x and y belong to ⋃⋃A.
+  -/
+  lemma OrderedPair.in_union_union (x y A : Set) :
+    OrderedPair x y ∈ A → x ∈ BigUnion (BigUnion A) ∧ y ∈ BigUnion (BigUnion A) := by
+      simp [OrderedPair]
+      aesop
+
+  -- Relation [Enderton, p. 40]
+  protected def relation_condition (A B : Set) (prop : Set → Set → Prop) : Set → Prop :=
+    λ w ↦ ∃ (x y : Set), x ∈ A ∧ y ∈ B ∧ prop x y ∧ w = OrderedPair x y
+  noncomputable def Relation (A B : Set) (prop : Set → Set → Prop) : Set :=
+    Classical.choose (comprehension (Set.relation_condition A B prop) (Product A B))
+  @[simp]
+  lemma Relation.Spec (A B : Set) (prop : Set → Set → Prop) :
+    ∀ (w : Set), w ∈ Relation A B prop ↔ w ∈ Product A B ∧ (Set.relation_condition A B prop) w := by
+  have h := Classical.choose_spec (comprehension (Set.relation_condition A B prop) (Product A B))
+  rw [Relation]
+  exact h
+
+  /-
+  [Enderton, p. 40]
+  Defining the domain, range, and field of a relation.
+  Here, we use the observation mentioned in p. 41:
+    - Using Lemma 3D, "we can use subset axioms to construct the domain and range of R"
+  -/
+  -- Relation domain
+  noncomputable def Relation.Domain (R : Set) : Set :=
+    Classical.choose (comprehension (λ x ↦ ∃ (y : Set), OrderedPair x y ∈ R) (BigUnion (BigUnion R)))
+  @[simp]
+  lemma Relation.Domain.Spec (R : Set) : ∀ x, x ∈ Relation.Domain R ↔ ∃ y, OrderedPair x y ∈ R := by
+    have h := Classical.choose_spec (comprehension (λ x ↦ ∃ (y : Set), OrderedPair x y ∈ R) (BigUnion (BigUnion R)))
+    rw [Relation.Domain]
+    simp [OrderedPair]
+    aesop
+  -- Relation range
+  noncomputable def Relation.Range (R : Set) : Set :=
+    Classical.choose (comprehension (λ y ↦ ∃ (x : Set), OrderedPair x y ∈ R) (BigUnion (BigUnion R)))
+  @[simp]
+  lemma Relation.Range.Spec (R : Set) : ∀ y, y ∈ Relation.Range R ↔ ∃ x, OrderedPair x y ∈ R := by
+    have h := Classical.choose_spec (comprehension (λ y ↦ ∃ (x : Set), OrderedPair x y ∈ R) (BigUnion (BigUnion R)))
+    rw [Relation.Range]
+    simp [OrderedPair]
+    aesop
+  -- Relation field
+  noncomputable def Relation.Field (R : Set) : Set := Relation.Domain R ∪ Relation.Range R
+  @[simp]
+  lemma Relation.Field.Spec (R : Set) : ∀ z, z ∈ Relation.Field R ↔ z ∈ Relation.Domain R ∨ z ∈ Relation.Range R := by
+    intro z
+    apply Iff.intro
+    { intro hz
+      rw [Relation.Field, Union.Spec] at hz
+      exact hz
+    }
+    { intro hz
+      rw [Relation.Field, Union.Spec]
+      exact hz
+    }
+
 
 end Set
