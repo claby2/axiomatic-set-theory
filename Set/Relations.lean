@@ -25,7 +25,7 @@ namespace Set
 
   /-
   [Enderton, Theorem 3A, p. 36]
-  The ordered pair ⟨x, y⟩ uniquely determineds both what x and y are, and the order upon them.
+  The ordered pair ⟨x, y⟩ uniquely determines both what x and y are, and the order upon them.
   -/
   theorem OrderedPair.uniqueness (u v x y : Set) :
     ⟨u, v⟩ = ⟨x, y⟩ ↔ u = x ∧ v = y := by
@@ -157,16 +157,8 @@ namespace Set
       aesop
 
   -- Relation [Enderton, p. 40]
-  protected def relation_condition (A B : Set) (prop : Set → Set → Prop) : Set → Prop :=
-    λ w ↦ ∃ (x y : Set), x ∈ A ∧ y ∈ B ∧ prop x y ∧ w = ⟨x, y⟩
-  noncomputable def Relation (A B : Set) (prop : Set → Set → Prop) : Set :=
-    Classical.choose (comprehension (Set.relation_condition A B prop) (Product A B))
-  @[simp]
-  lemma Relation.Spec (A B : Set) (prop : Set → Set → Prop) :
-    ∀ (w : Set), w ∈ Relation A B prop ↔ w ∈ Product A B ∧ (Set.relation_condition A B prop) w := by
-  have h := Classical.choose_spec (comprehension (Set.relation_condition A B prop) (Product A B))
-  rw [Relation]
-  exact h
+  def IsRelation (R : Set) : Prop :=
+    ∀ w, w ∈ R → ∃ x y, w = ⟨x, y⟩
 
   /-
   [Enderton, p. 40]
@@ -209,6 +201,4 @@ namespace Set
       exact hz
     }
   notation:90 "fld " R => Relation.Field R
-
-
 end Set

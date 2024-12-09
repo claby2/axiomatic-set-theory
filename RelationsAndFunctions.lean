@@ -68,39 +68,54 @@ lemma exercise_3_2 (A B C : Set) :
   exact And.intro a b
 
 /-
+[Enderton, Exercise 3.6]
+Show that a set A is a relation iff A ⊆ dom A ⨯ ran A
+-/
+lemma exercise_3_6 (A : Set) : Set.IsRelation A ↔ A ⊆ (dom A) ⨯ (ran A) := by
+  apply Iff.intro
+  { intro h
+    rw [Set.SubsetOf]
+    intro w hw
+    rw [Set.Product.Spec]
+    have hxy : ∃ x y, w = ⟨x, y⟩ := by aesop
+    apply And.intro
+    { aesop }
+    { aesop }
+  }
+  { intro h
+    rw [Set.SubsetOf] at h
+    intro t ht
+    have htx := h t ht
+    rw [Set.Product.Spec] at htx
+    obtain ⟨_, ⟨x, y, ⟨_, _, hxy⟩⟩⟩ := htx
+    apply Exists.intro x
+    apply Exists.intro y
+    exact hxy
+  }
+
+/-
 [Enderton, Exercise 3.7]
 Show that if R is a relation, then fld R = ⋃⋃R
 -/
-lemma exercise_3_7 (A B R : Set) (prop : Set → Set → Prop) : R = Set.Relation A B prop → (fld R) = ⋃⋃R := by
+lemma exercise_3_7 (R : Set) : Set.IsRelation R → (fld R) = ⋃⋃R := by
   intro h
   apply Set.extensionality
   intro x
   apply Iff.intro
   { intro hx
-    rw [Set.Relation.Field.Spec] at hx
+    simp [Set.Relation.Field.Spec] at hx
     cases hx with
       | inl hx =>
-        rw [Set.Relation.Domain.Spec] at hx
         obtain ⟨y, hy⟩ := hx
         exact (Set.OrderedPair.in_union_union x y R hy).left
       | inr hx =>
-        rw [Set.Relation.Range.Spec] at hx
         obtain ⟨y, hy⟩ := hx
         exact (Set.OrderedPair.in_union_union y x R hy).right
   }
   { intro hx
     rw [Set.Relation.Field.Spec, Set.Relation.Domain.Spec, Set.Relation.Range.Spec]
-    rw [h] at hx
-    rw [Set.BigUnion.Spec] at hx
-    obtain ⟨b₁, ⟨hb₂, hb₁⟩⟩ := hx
-    rw [Set.BigUnion.Spec] at hb₂
-    obtain ⟨b₂, ⟨hb₂, hb₁b₂⟩⟩ := hb₂
-    rw [Set.Relation.Spec, Set.Product.Spec] at hb₂
-    obtain ⟨⟨_, _, _, _, _, h⟩, _⟩ := hb₂
-    rw [Set.OrderedPair] at h
-    rw [h] at hb₁b₂
-    rw [Set.Pair.Spec] at hb₁b₂
-    cases hb₁b₂ with
-      | inl h => aesop
-      | inr h => aesop
-  }
+    simp [Set.BigUnion.Spec] at hx
+    obtain ⟨b, ⟨⟨w, ⟨hwR, hbw⟩⟩, hxb⟩⟩ := hx
+    have h : ∃ x y, w = ⟨x, y⟩ := by aesop
+    aesop
+    }
