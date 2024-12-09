@@ -5,7 +5,7 @@ namespace Set
   def IsFunction (F : Set) : Prop :=
     IsRelation F ∧ ∀ x, x ∈ (dom F) → ∃! y, ⟨x, y⟩ ∈ F
   -- A set R is single-rooted iff for each y ∈ ran R there is only one x such that xRy.
-  def SingleRooted (R : Set) : Prop :=
+  def IsSingleRooted (R : Set) : Prop :=
     ∀ (y : Set), y ∈ (ran R) → ∃! (x: Set), ⟨x, y⟩ ∈ R
 
   /-
@@ -95,12 +95,12 @@ namespace Set
   [Enderton, Theorem 3F, p. 46]
   For a set F, F⁻¹ is a function iff F is single-rooted. A relation F is a function iff F⁻¹ is single-rooted.
   -/
-  theorem inverse_single_rooted (F : Set) : IsFunction (Inverse F) ↔ SingleRooted F := by
+  theorem inverse_single_rooted (F : Set) : IsFunction (Inverse F) ↔ IsSingleRooted F := by
     apply Iff.intro
     { intro hFi
       rw [IsFunction, domain_inverse] at hFi
       obtain ⟨_, hFi⟩ := hFi
-      rw [SingleRooted]
+      rw [IsSingleRooted]
       intro x hx
       have hy := hFi x hx
       obtain ⟨y, hy, hy'⟩ := hy
@@ -115,15 +115,63 @@ namespace Set
       { exact huv.left }
       { aesop }
     }
-    { intro h
-      sorry
+    {
+      -- IsSingleRooted F → F⁻¹ is a function
+      intro h
+      rw [IsSingleRooted] at h
+      apply And.intro
+      { -- Show: F⁻¹ is a relation
+        rw [IsRelation]
+        aesop
+      }
+      {
+        intro x hx
+        rw [domain_inverse] at hx
+        have h := h x hx
+        obtain ⟨y, hy, hyuniq⟩ := h
+        apply Exists.intro y
+        apply And.intro
+        { simp [Inverse.Spec]
+          aesop
+        }
+        { intro y' hy'
+          rw [Inverse.Spec] at hy'
+          obtain ⟨u, v, huv⟩ := hy'
+          have huveq : x = v ∧ y' = u := by
+            rw [OrderedPair.uniqueness] at huv
+            exact huv.right
+          aesop
+        }
+      }
     }
-  theorem relation_function_single_rooted (F : Set) {hF : IsRelation F} : IsFunction F ↔ SingleRooted (Inverse F) := by sorry
+  theorem relation_function_single_rooted (F : Set) {hR : IsRelation F} : IsFunction F ↔ IsSingleRooted (Inverse F) := by
+    have h := inverse_single_rooted (Inverse F)
+    rw [relation_inverse_inverse] at h
+    exact h
+    exact hR
 
   /-
   [Enderton, Theorem 3G, p. 46]
   Assume that F is a one-to-one function. If x ∈ dom F, then F⁻¹(F(x)) = x. If y ∈ ran F, then F(F⁻¹(y)) = y.
   -/
-  theorem one_to_one_inverse (F : Set) : IsFunction F → (∀ x, x ∈ (dom F) → ∃ y, ⟨x, y⟩ ∈ F ∧ ⟨y, x⟩ ∈ F⁻¹) := by sorry
-  theorem one_to_one_inverse' (F : Set) : IsFunction F → (∀ y, y ∈ (ran F) → ∃ x, ⟨y, x⟩ ∈ F⁻¹ ∧ ⟨x, y⟩ ∈ F) := by sorry
+  theorem one_to_one_inverse (F : Set) : IsFunction F ∧ IsSingleRooted F → (∀ x, x ∈ (dom F) → ∃ y, ⟨x, y⟩ ∈ F ∧ ⟨y, x⟩ ∈ F⁻¹) := by
+    intro ⟨hF, hSR⟩
+    intro x hx
+    rw [IsFunction] at hF
+    obtain ⟨_, hF⟩ := hF
+    have hy := hF x hx
+    have ⟨y, hy, hyuniq⟩ := hy
+    simp at hy
+    have hyi : ⟨y, x⟩ ∈ F⁻¹ := by aesop
+    have hydomi : y ∈ dom (F⁻¹) := by aesop
+    have hFi : IsFunction (F⁻¹) := by
+      rw [inverse_single_rooted]
+      exact hSR
+    aesop
+  theorem one_to_one_inverse' (F : Set) : IsFunction F ∧ IsSingleRooted F → (∀ y, y ∈ (ran F) → ∃ x, ⟨y, x⟩ ∈ F⁻¹ ∧ ⟨x, y⟩ ∈ F) := by
+    intro hF
+    intro y hy
+    have h := one_to_one_inverse (Inverse F)
+    aesop
+
 end Set
