@@ -1,5 +1,7 @@
 # Axiomatic Set Theory
 
+Project link: <https://github.com/claby2/axiomatic-set-theory>
+
 This project seeks to formalize an axiomatic approach to set theory within Lean.
 Drawing inspiration from Enderton's *Elements of Set Theory*, it begins with the fundamental axioms and proceeds to formalize selected theorems and exercises presented in the book. While this document provides a brief overview, the project's full details and implementations (including proofs to theorems and exercises) can be found in its source code.
 
