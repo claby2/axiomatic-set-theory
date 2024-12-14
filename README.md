@@ -7,8 +7,8 @@ Drawing inspiration from Enderton's *Elements of Set Theory*, it begins with the
 
 ## Overview
 
-The core of the project involves introducing a primitive notion of a set and a membership relation, and then building up the stnadard axioms of ZFC-like set theory.
-The development proceeds through the formalization of sets, elementary contructions, and fundamental operations, eventually leading to the formalization of relations, functions, and the beginnings of natural number construction.
+The core of the project involves introducing a primitive notion of a set and a membership relation, and then building up the standard axioms of ZFC-like set theory.
+The development proceeds through the formalization of sets, elementary constructions, and fundamental operations, eventually leading to the formalization of relations, functions, and the beginnings of natural number construction.
 
 ### Basic Definitions
 
@@ -33,7 +33,7 @@ def SubsetOf (x a : Set) : Prop := ∀ (t : Set), t ∈ x → t ∈ a
 
 With these fundamental ingredients in place, the axioms of set theory are stated.
 These include the axiom of comprehension (sometimes called subset or separation), extensionality, the existence of an empty set, pairing, the power set, and union.
-Each axiom is stated as an existential claim that asserts the exiistence of a set satisfying a given property:
+Each axiom is stated as an existential claim that asserts the existence of a set satisfying a given property:
 
 ```lean
 axiom comprehension (P : Set → Prop) (c : Set) :
@@ -48,7 +48,7 @@ axiom union : ∀ (A : Set), ∃ (B : Set), ∀ (x : Set), x ∈ B ↔ (∃ (b :
 
 ### Constructing Specific Sets
 
-From these axioms, particular sets are constructed using the classical choise operator ([`Classical.choose`](https://leanprover-community.github.io/mathlib4_docs/Init/Classical.html#Classical.choose)).
+From these axioms, particular sets are constructed using the classical choice operator ([`Classical.choose`](https://leanprover-community.github.io/mathlib4_docs/Init/Classical.html#Classical.choose)).
 For example, the empty set is defined as follows:
 
 ```lean
@@ -58,12 +58,12 @@ notation "∅" => Empty
 ```
 
 This pattern -- defining a set using `Classical.choose` and then providing a lemma stating its properties -- recurs throughout the project.
-For instance, the construction of pairs, singletons, unions, intersections, and power sets follow a similar methodology.
+For instance, the construction of pairs, singletons, unions, intersections, and power sets follows a similar methodology.
 Uniqueness results can then be proven separately when necessary.
 
 ### Relations and Functions
 
-Once these basic building blocks are in place, the formalization extends to ordered pairs, produxts, relation, and functions.
+Once these basic building blocks are in place, the formalization extends to ordered pairs, products, relations, and functions.
 Ordered pairs are defined following Kuratowski's approach as outlined in Enderton:
 
 ```lean
@@ -71,7 +71,7 @@ noncomputable def OrderedPair (x y : Set) : Set := Pair (Singleton x) (Pair x y)
 notation:90 "⟨" x ", " y "⟩" => OrderedPair x y
 ```
 
-With ordered pairs, we can proveed by defining products and products, along with domains, ranges, and fields of relations.
+With ordered pairs, we can proceed by defining products and products, along with domains, ranges, and fields of relations.
 
 ```lean
 noncomputable def Product (A B : Set) : Set := Classical.choose (OrderedPair.product A B)
@@ -84,7 +84,7 @@ noncomputable def Relation.Range (R : Set) : Set :=
 noncomputable def Relation.Field (R : Set) : Set := (dom R) ∪ (ran R)
 ```
 
-A natural extension of relations is formalizing the notiong of functions, which are defined as a special kind of relation. From Enderton, to be a function, a set must be a relation that satisfies the property that for each $x$ in the domain of the relation, there exists only one $y$ such that $xFy$.
+A natural extension of relations is formalizing the notions of functions, which are defined as a special kind of relation. From Enderton, to be a function, a set must be a relation that satisfies the property that for each $x$ in the domain of the relation, there exists only one $y$ such that $xFy$.
 This is expressed in Lean as follows:
 
 ```lean
@@ -117,7 +117,7 @@ As noted in Enderton, this is formalized in a way that applies to all sets, not 
 ### Natural Numbers
 
 The final part of the current work involves the beginnings of natural number construction.
-Following the standard set-theoretic approach, the successor operation is introduced,a nd inductive sets are defined.
+Following the standard set-theoretic approach, the successor operation is introduced, and inductive sets are defined.
 Natural numbers are then those sets contained in every inductive set.
 
 ```lean
