@@ -69,12 +69,6 @@ noncomputable def OrderedPair (x y : Set) : Set := Pair (Singleton x) (Pair x y)
 notation:90 "⟨" x ", " y "⟩" => OrderedPair x y
 ```
 
-That is,
-
-$$
-\langle x, y \rangle = \{\{x\}, \{x, y\}\}
-$$
-
 With ordered pairs, we can proveed by defining products and products, along with domains, ranges, and fields of relations.
 
 ```lean
