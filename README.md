@@ -1,29 +1,37 @@
 # Axiomatic Set Theory
 
-This project seeks to embed axiomatic set theory within Lean. Inspired by Enderton's "Elements of Set Theory," this project begins with fundamental axioms and proceeds to formalize the proofs of theorems and exercises presented in the book.
+This project seeks to formalize an axiomatic approach to set theory within Lean.
+Drawing inspiration from Enderton's *Elements of Set Theory*, it begins with the fundamental axioms and proceeds to formalize selected theorems and exercises presented in the book. While this document provides a brief overview, the project's full details and implementations (including proofs to theorems and exercises) can be found in its source code.
 
-The following serves as a (brief) overview of the formalization of the axioms and theorems in the project.
-For the full picture, please refer to the project's source code.
+## Overview
 
-The formalization begins by defining a `Set` as an axiom and what it means to be an "element of" a set (set membership).
+The core of the project involves introducing a primitive notion of a set and a membership relation, and then building up the stnadard axioms of ZFC-like set theory.
+The development proceeds through the formalization of sets, elementary contructions, and fundamental operations, eventually leading to the formalization of relations, functions, and the beginnings of natural number construction.
+
+### Basic Definitions
+
+First, a `Set` type is introduced as an axiom, along with a membership predicate `ElementOf`:
 
 ```lean
 axiom Set : Type
 
-namespace Set
-  axiom ElementOf : Set -> Set -> Prop
-end
+axiom ElementOf : Set -> Set -> Prop
+infix:50 " ∈ " => ElementOf
+infix:40 " ∉ " => λ x y => ¬ ElementOf x y
 ```
 
-Then, the notion of what it means to be `Nonempty` and be a `SubsetOf` another set can be defined in terms of set membership:
+Using this notion, the usual set-theoretic definitions are introduced:
 
 ```lean
 def Nonempty (A : Set) : Prop := ∃ (x : Set), x ∈ A
 def SubsetOf (x a : Set) : Prop := ∀ (t : Set), t ∈ x → t ∈ a
 ```
 
-From this, we can define the axioms of extensionality, comprehension (subset axiom), emptiness, pairing, power, and union.
-These axioms largely take on the form of existential claims, where we assert the existence of a set that satisfies a certain property.
+### Axioms
+
+With these fundamental ingredients in place, the axioms of set theory are stated.
+These include the axiom of comprehension (sometimes called subset or separation), extensionality, the existence of an empty set, pairing, the power set, and union.
+Each axiom is stated as an existential claim that asserts the exiistence of a set satisfying a given property:
 
 ```lean
 axiom comprehension (P : Set → Prop) (c : Set) :
@@ -36,8 +44,10 @@ axiom union_preliminary : ∀ (a b : Set), ∃ (B : Set), ∀ (x : Set), x ∈ B
 axiom union : ∀ (A : Set), ∃ (B : Set), ∀ (x : Set), x ∈ B ↔ (∃ (b : Set), b ∈ A ∧ x ∈ b)
 ```
 
-Using the existence of these sets, we can then define a way to construct instances of these sets.
-For example, using the empty set axiom (that is, there exists some set such that no element is a member of it), we can construct the empty set as follows:
+### Constructing Specific Sets
+
+From these axioms, particular sets are constructed using the classical choise operator ([`Classical.choose`](https://leanprover-community.github.io/mathlib4_docs/Init/Classical.html#Classical.choose)).
+For example, the empty set is defined as follows:
 
 ```lean
 noncomputable def Empty : Set := Classical.choose empty
@@ -45,21 +55,29 @@ lemma Empty.Spec : ∀ x : Set, x ∉ Empty := Classical.choose_spec empty
 notation "∅" => Empty
 ```
 
-The above construction features a pattern that is is commonly featured throughout the project.
-We first define a `noncomputable` definition that uses choice to construct a set that satisfies the desired property (`Empty`).
-Then, an accompanying lemma is defined that asserts the property of the constructed set (e.g. `Empty.Spec`).
-This lemma is useful when proving theorems about the constructed set.
-Finally, a notation is defined for the constructed set for convenience.
+This pattern -- defining a set using `Classical.choose` and then providing a lemma stating its properties -- recurs throughout the project.
+For instance, the construction of pairs, singletons, unions, intersections, and power sets follow a similar methodology.
+Uniqueness results can then be proven separately when necessary.
 
-Hence, in a similar manner, we can define and construct notions such as the pair of two sets, the singleton set, the union and intersection of two sets, and the power set among others.
+### Relations and Functions
 
-> **A note on uniqueness**: while the above approach does not immediately guarantee the uniqueness of the constructed set, auxiliary lemmas can be defined to assert the uniqueness of the constructed set. This is done when necessary.
-
-With these basic notions in place, we can then proceed to construct ordered pairs and products along with domains, ranges, and fields of relations.
+Once these basic building blocks are in place, the formalization extends to ordered pairs, produxts, relation, and functions.
+Ordered pairs are defined following Kuratowski's approach as outlined in Enderton:
 
 ```lean
 noncomputable def OrderedPair (x y : Set) : Set := Pair (Singleton x) (Pair x y)
 notation:90 "⟨" x ", " y "⟩" => OrderedPair x y
+```
+
+That is,
+
+$$
+\langle x, y \rangle = \{\{x\}, \{x, y\}\}
+$$
+
+With ordered pairs, we can proveed by defining products and products, along with domains, ranges, and fields of relations.
+
+```lean
 noncomputable def Product (A B : Set) : Set := Classical.choose (OrderedPair.product A B)
 infix:60 " ⨯ " => Product
 def IsRelation (R : Set) : Prop := ∀ w, w ∈ R → ∃ x y, w = ⟨x, y⟩
@@ -70,7 +88,7 @@ noncomputable def Relation.Range (R : Set) : Set :=
 noncomputable def Relation.Field (R : Set) : Set := (dom R) ∪ (ran R)
 ```
 
-A natural extension of relations is formalizing the notiong of functions, which are defined as a special kind of relation. From Enderton, to be a function, a set must be a relation that satisfies the property that for each x in the domain of the relation, there exists only one y such that xFy.
+A natural extension of relations is formalizing the notiong of functions, which are defined as a special kind of relation. From Enderton, to be a function, a set must be a relation that satisfies the property that for each $x$ in the domain of the relation, there exists only one $y$ such that $xFy$.
 This is expressed in Lean as follows:
 
 ```lean
@@ -100,24 +118,22 @@ notation:90 F "⟦" A "⟧" => Image F A
 
 As noted in Enderton, this is formalized in a way that applies to all sets, not just sets that are functions.
 
-We also start formalizing the notion of natural numbers.
-This section starts out by defining what it means to be a "successor" of another set.
-That is,
+### Natural Numbers
+
+The final part of the current work involves the beginnings of natural number construction.
+Following the standard set-theoretic approach, the successor operation is introduced,a nd inductive sets are defined.
+Natural numbers are then those sets contained in every inductive set.
 
 ```lean
 noncomputable def Successor (a : Set) : Set := a ∪ Singleton a
-```
-
-Then, we define the property of being inductive and define a natural number as a set that belongs to every inductive set.
-
-```lean
+postfix:90 "⁺" => Successor
 def Inductive (A : Set) : Prop := ∅ ∈ A ∧ ∀ a, a ∈ A → a⁺ ∈ A
 def Natural (n : Set) : Prop := ∀ (A : Set), Inductive A → n ∈ A
 ```
 
 ## Next Steps
 
-Thus far, this project only formalizes the first few chapters of Enderton's "Elements of Set Theory."
-Even then, there are still some theorems and many exercises that have yet to be formalized.
-A natural next direction would be to complete the formalization of the natural numbers (predicated on the formalization of the recursion theorem), which then permits the formalization of arithmetic operations.
-Real numbers, cardinal numbers, and ordinals are also interesting directions to explore.
+So far, the project has developed the foundational machinery through the first few chapters of Enderton's *Elements of Set Theory*.
+Many theorems and exercises still remain to be formalized.
+A natural next step is to complete the formalization of the natural numbers, which will require invoking the recursion theorem.
+Once natural numbers are fully treated, the path is open to formalizing arithmetic, real numbers, cardinal numbers, and ordinals.
